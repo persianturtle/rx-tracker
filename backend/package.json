@@ -1,0 +1,23 @@
+{
+  "name": "rx-tracker-backend",
+  "type": "module",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/persianturtle/rx-tracker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/persianturtle/rx-tracker/issues"
+  },
+  "homepage": "https://github.com/persianturtle/rx-tracker#readme",
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.147"
+  }
+}

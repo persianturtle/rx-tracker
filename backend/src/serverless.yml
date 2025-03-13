@@ -1,0 +1,34 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: rxtracker
+# "app" enables Serverless Framework Dashboard features and sharing them with other Services.
+app: rx-tracker
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: rx-tracker
+
+frameworkVersion: ">=4"
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+
+  httpApi:
+    cors:
+      allowedOrigins:
+        - http://localhost:3000
+      allowedHeaders:
+        - Content-Type
+        - Authorization
+      allowedMethods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+        - OPTIONS
+
+functions:
+  hello:
+    handler: handler.hello
+    events:
+      - httpApi:
+          path: /
+          method: get
