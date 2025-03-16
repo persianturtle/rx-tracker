@@ -1,6 +1,5 @@
 {
   "name": "rx-tracker-backend",
-  "type": "module",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -19,5 +18,8 @@
   "homepage": "https://github.com/persianturtle/rx-tracker#readme",
   "devDependencies": {
     "@types/aws-lambda": "^8.10.147"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.1692.0"
   }
 }
