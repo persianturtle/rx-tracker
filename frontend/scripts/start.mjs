@@ -1,12 +1,10 @@
 import path from "path";
 import { spawn, spawnSync } from "child_process";
-import chokidar from "chokidar";
 import { fileURLToPath } from "url";
-
-let referenceToProcess;
+import chokidar from "chokidar";
 
 build();
-startServer();
+const serverProcess = startServer();
 
 chokidar
   .watch(`${path.dirname(fileURLToPath(import.meta.url))}/../src`, {
@@ -15,14 +13,14 @@ chokidar
   .on("all", build);
 
 function build() {
-  spawnSync("node", ["scripts/build.mjs"], {
+  spawnSync("npm", ["run", "build"], {
     stdio: "inherit",
     shell: true,
   });
 }
 
 function startServer() {
-  referenceToProcess = spawn(
+  return spawn(
     "npx",
     [
       "http-server",
@@ -38,10 +36,7 @@ function startServer() {
 }
 
 function stopServer() {
-  if (referenceToProcess) {
-    referenceToProcess.kill("SIGTERM");
-    referenceToProcess = null;
-  }
+  serverProcess.kill("SIGTERM");
 }
 
 process.on("SIGINT", () => {

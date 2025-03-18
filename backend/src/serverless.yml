@@ -6,16 +6,98 @@ provider:
   name: aws
   runtime: nodejs20.x
   region: us-east-1
+  vpc:
+    securityGroupIds:
+      - sg-01ecc56d114b6519f
+    subnetIds:
+      - subnet-0766624a6544b0e40
+      - subnet-0c63ac18cbd7abe37
   apiGateway:
     apiKeys:
-      - api-key-for-person1
-      - api-key-for-person2
+      - api-key-for-caregiver1
+      - api-key-for-caregiver2
+  environment:
+    PG_HOST: !GetAtt RDSInstance.Endpoint.Address
+    PG_PORT: "5432"
+    PG_USER: "rxtracker"
+    PG_PASSWORD: "littlejohnnytablesxkcd"
+    PG_DATABASE: "rxtracker_db"
 
 functions:
-  hello:
-    handler: handler.hello
+  read:
+    handler: events.read
+    vpc:
+      securityGroupIds:
+        - sg-01ecc56d114b6519f
+      subnetIds:
+        - subnet-0766624a6544b0e40
+        - subnet-0c63ac18cbd7abe37
     events:
       - http:
-          path: hello
+          path: read
           method: get
           private: true
+          cors:
+            origin: "http://localhost:3000"
+            headers:
+              - content-type
+              - x-api-key
+  store:
+    handler: events.store
+    vpc:
+      securityGroupIds:
+        - sg-01ecc56d114b6519f
+      subnetIds:
+        - subnet-0766624a6544b0e40
+        - subnet-0c63ac18cbd7abe37
+    events:
+      - http:
+          path: store
+          method: post
+          private: true
+          cors:
+            origin: "http://localhost:3000"
+            headers:
+              - content-type
+              - x-api-key
+  reset:
+    handler: events.reset
+    vpc:
+      securityGroupIds:
+        - sg-01ecc56d114b6519f
+      subnetIds:
+        - subnet-0766624a6544b0e40
+        - subnet-0c63ac18cbd7abe37
+    events:
+      - http:
+          path: reset
+          method: delete
+          private: true
+
+resources:
+  Resources:
+    RDSInstance:
+      Type: AWS::RDS::DBInstance
+      Properties:
+        DBInstanceIdentifier: rxtrackerdb2
+        AllocatedStorage: 20
+        DBInstanceClass: db.t3.micro
+        Engine: postgres
+        MasterUsername: rxtracker
+        MasterUserPassword: "littlejohnnytablesxkcd"
+        DBName: rxtracker_db
+        VPCSecurityGroups:
+          - sg-01ecc56d114b6519f
+        PubliclyAccessible: false
+        StorageType: gp2
+
+    RDSSecurityGroup:
+      Type: AWS::EC2::SecurityGroup
+      Properties:
+        GroupDescription: Allow Lambda to access RDS
+        VpcId: vpc-06ce9b68c47282267
+        SecurityGroupIngress:
+          - IpProtocol: tcp
+            FromPort: 5432
+            ToPort: 5432
+            SourceSecurityGroupId: sg-01ecc56d114b6519f
