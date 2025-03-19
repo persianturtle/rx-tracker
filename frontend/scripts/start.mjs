@@ -24,12 +24,12 @@ function startServer() {
     "npx",
     [
       "http-server",
+      "dist",
       "-c-1",
       "--proxy",
       "http://localhost:3000?",
       "--port",
       "3000",
-      "dist",
     ],
     { stdio: "inherit", shell: true }
   );

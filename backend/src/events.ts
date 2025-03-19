@@ -1,39 +1,49 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { Client } from "pg";
+import { getCaregiverIdByAPIKey } from "@shared/caregivers";
 
+/**
+curl https://zitkwp8dqf.execute-api.us-east-1.amazonaws.com/dev/read \
+     -H "x-api-key: Ld6nYabJTJ13Qil6nwJBk8qrA2hUVaN52OboRJgZ"
+
+curl https://zitkwp8dqf.execute-api.us-east-1.amazonaws.com/dev/read \
+      -H "x-api-key: zAVMbyhsmj9dAJ9USwijrIdsfng9HWQ7yXYpWfb0"
+ */
 export const read = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   const client = getPostgreSQLClient();
-  const caregiverId = getCaregiverId(event.headers["x-api-key"]);
-  const lastEventId = event.queryStringParameters?.["lastEventId"];
+  const caregiverId = getCaregiverIdByAPIKey(event.headers["x-api-key"]);
+  const cachedEventTimestamp =
+    event.queryStringParameters?.["cachedEventTimestamp"];
 
-  if (lastEventId) {
+  if (cachedEventTimestamp) {
     const query = `
     SELECT * FROM events 
-    WHERE caregiver_id = $1 AND id > $2 
-    ORDER BY timestamp DESC;
+    WHERE caregiver_id = $1 AND timestamp > $2
+    ORDER BY timestamp ASC;
   `;
 
     await client.connect();
-    const res = await client.query(query, [caregiverId, lastEventId]);
+    const res = await client.query(query, [caregiverId, cachedEventTimestamp]);
     await client.end();
 
-    // TODO: handle errors, e.g. what if lastEventId is provided but not valid?
+    // TODO: handle errors, e.g. what if cachedEventTimestamp is provided but not valid?
     // TODO: handle pagination
 
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
-        data: res,
+        data: res.rows,
       }),
     };
   } else {
     const query = `
     SELECT * FROM events 
     WHERE caregiver_id = $1 
-    ORDER BY timestamp DESC;
+    ORDER BY timestamp DESC
+    LIMIT 1;
   `;
 
     await client.connect();
@@ -46,7 +56,7 @@ export const read = async (
       statusCode: 200,
       headers,
       body: JSON.stringify({
-        data: res,
+        data: res.rows,
       }),
     };
   }
@@ -62,10 +72,11 @@ export const store = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
   const client = getPostgreSQLClient();
-  const caregiverId = getCaregiverId(event.headers["x-api-key"]);
+  const caregiverId = getCaregiverIdByAPIKey(event.headers["x-api-key"]);
   const { event_type, payload } = JSON.parse(event.body ?? "{}");
 
   // TODO: hanlde errors, e.g. what if caregiverId is null?
+  // TODO: validate types using zod, and define types in shared/types.ts
 
   if (!(event_type && payload)) {
     return {
@@ -79,8 +90,7 @@ export const store = async (
 
   const query = `
     INSERT INTO events (event_type, caregiver_id, payload)
-    VALUES ($1, $2, $3)
-    RETURNING *;
+    VALUES ($1, $2, $3);
   `;
 
   await client.connect();
@@ -91,7 +101,7 @@ export const store = async (
     statusCode: 201,
     headers,
     body: JSON.stringify({
-      data: res,
+      data: res.rows,
     }),
   };
 };
@@ -116,6 +126,7 @@ export const reset = async (
       payload JSONB NOT NULL,
       timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
+    CREATE INDEX idx_events_timestamp ON events (caregiver_id, timestamp);
   `;
 
   await client.connect();
@@ -126,21 +137,10 @@ export const reset = async (
     statusCode: 201,
     headers,
     body: JSON.stringify({
-      data: res,
+      data: res.rows,
     }),
   };
 };
-
-function getCaregiverId(apiKey: string | undefined): string | null {
-  switch (apiKey) {
-    case "zAVMbyhsmj9dAJ9USwijrIdsfng9HWQ7yXYpWfb0":
-      return "Caregiver 1";
-    case "Ld6nYabJTJ13Qil6nwJBk8qrA2hUVaN52OboRJgZ":
-      return "Caregiver 2";
-    default:
-      return null;
-  }
-}
 
 function getPostgreSQLClient(): Client {
   return new Client({

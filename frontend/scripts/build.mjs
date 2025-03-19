@@ -20,7 +20,7 @@ await esbuild.build({
   outdir: "dist",
   minify: true,
   metafile: true,
-  entryNames: "[name].[hash]",
+  entryNames: "app.[hash]",
   plugins: [htmlEsbuildPlugin(), svgrPlugin()],
 });
 

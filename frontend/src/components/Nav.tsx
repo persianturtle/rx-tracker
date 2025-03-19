@@ -1,22 +1,35 @@
-import { useState } from "react";
+import { useEffect, useRef } from "react";
+import { NavLink, useNavigate } from "react-router";
+import useStore from "@store";
 import { css } from "@emotion/css";
 import HamburgerIcon from "@img/hamburger.svg";
 import ArrowIcon from "@img/arrow.svg";
 
-export default function App() {
-  const [isNavOpen, setIsNavOpen] = useState(false);
+export default function Nav() {
+  const openButtonRef = useRef<HTMLButtonElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const [isNavOpen, setStore] = useStore((store) => store.isNavOpen);
+  const [loggedInAs] = useStore((store) => store.loggedInAs);
+  const [caregiverId] = useStore((store) => store.caregiverId);
+  const [recipients] = useStore((store) => store.recipients);
+  let navigate = useNavigate();
+
+  useEffect(() => {
+    if (isNavOpen) {
+      if (closeButtonRef.current) {
+        closeButtonRef.current.focus();
+      }
+    }
+  }, [isNavOpen]);
 
   return (
-    <div
-      className={wrapper(isNavOpen)}
-      onClick={() => {
-        if (isNavOpen) {
-          setIsNavOpen(false);
-        }
-      }}
-    >
+    <>
       <header className={header}>
-        <button onClick={() => setIsNavOpen(!isNavOpen)}>
+        <button
+          ref={openButtonRef}
+          onClick={() => setStore({ isNavOpen: !isNavOpen })}
+          tabIndex={isNavOpen ? -1 : 0}
+        >
           <HamburgerIcon />
         </button>
         <h1>RxTracker</h1>
@@ -26,75 +39,76 @@ export default function App() {
         onClick={(event) => event.stopPropagation()}
       >
         <header>
-          <button onClick={() => setIsNavOpen(false)}>
+          <button
+            ref={closeButtonRef}
+            onClick={() => setStore({ isNavOpen: false })}
+          >
             <ArrowIcon /> Home
           </button>
-          <div
-            className={css`
-              margin-top: auto;
-              padding: 0 15px;
-
-              select {
-                width: 100%;
-                padding: 5px;
-                font-size: 16px;
-            `}
-          >
+          <div className={div}>
             <p>Logged in as:</p>
-            <select>
-              <option value="zAVMbyhsmj9dAJ9USwijrIdsfng9HWQ7yXYpWfb0">
-                Caregiver 1
-              </option>
-              <option value="Ld6nYabJTJ13Qil6nwJBk8qrA2hUVaN52OboRJgZ">
-                Caregiver 2
-              </option>
+            <select
+              onChange={(event) => {
+                const caregiverId = Number(
+                  event.target.value.replace(/\D+/, "")
+                );
+
+                setStore({
+                  loggedInAs: event.target.value,
+                  isNavOpen: false,
+                  caregiverId,
+                });
+                navigate(`/caregiver/${caregiverId}`);
+              }}
+              value={loggedInAs}
+            >
+              <option value="Caregiver 1">Caregiver 1</option>
+              <option value="Caregiver 2">Caregiver 2</option>
             </select>
           </div>
         </header>
         <ul>
           <li>
-            <a href="/">Home</a>
+            <NavLink
+              to={`/caregiver/${caregiverId}`}
+              end
+              onClick={() => setStore({ isNavOpen: false })}
+            >
+              Recipients
+            </NavLink>
           </li>
           <li>
-            <a href="/about">About</a>
-          </li>
-          <li>
-            <a href="/contact">Contact</a>
+            <NavLink
+              to={`/caregiver/${caregiverId}/recipient/add`}
+              end
+              onClick={() => setStore({ isNavOpen: false })}
+            >
+              Add New Recipient
+            </NavLink>
           </li>
         </ul>
+        {recipients.length > 0 && (
+          <>
+            <label>Recipients</label>
+            <ul>
+              {recipients.map((recipient) => (
+                <li key={recipient.id}>
+                  <NavLink
+                    to={`/caregiver/${caregiverId}/recipient/${recipient.id}`}
+                    end
+                    onClick={() => setStore({ isNavOpen: false })}
+                  >
+                    {recipient.name}
+                  </NavLink>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
       </nav>
-      <main></main>
-      <footer></footer>
-    </div>
+    </>
   );
 }
-
-const wrapper = (isNavOpen: boolean) => css`
-  min-height: 100vh;
-
-  &::after {
-    content: "";
-    transition: opacity 450ms cubic-bezier(0.23, 1, 0.32, 1),
-      transform 0ms cubic-bezier(0.23, 1, 0.32, 1) 450ms;
-    position: fixed;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    background-color: rgba(0, 0, 0, 0.33);
-    transform: translateX(-100%);
-    opacity: 0;
-    z-index: 1;
-
-    ${isNavOpen
-      ? `
-      transition: opacity 450ms cubic-bezier(0.23, 1, 0.32, 1);
-      transform: translateX(0%);
-      opacity: 1;
-    `
-      : ""}
-  }
-`;
 
 const header = css`
   display: flex;
@@ -141,9 +155,12 @@ const nav = (isNavOpen: boolean) => css`
     0px 3px 10px 0 rgba(0, 0, 0, 0.23);
   overflow: auto;
   z-index: 2;
-  visibility: ${isNavOpen ? "visible" : "hidden"};
 
   transform: ${isNavOpen ? "translateX(0)" : "translateX(calc(-100% - 10px))"};
+
+  > * {
+    visibility: ${isNavOpen ? "visible" : "hidden"};
+  }
 
   > header {
     position: relative;
@@ -198,19 +215,9 @@ const nav = (isNavOpen: boolean) => css`
       position: relative;
       border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 
-      svg {
-        position: absolute;
-        top: 0;
-        right: 15px;
-        bottom: 0;
-        margin: auto;
-        width: 15px;
-        height: 15px;
-      }
-
       > a {
         transition: background-color 450ms cubic-bezier(0.23, 1, 0.32, 1);
-        font-size: 18px;
+        font-size: 16px;
         line-height: 54px;
         text-decoration: none;
         display: block;
@@ -221,11 +228,6 @@ const nav = (isNavOpen: boolean) => css`
           background-color: #e9e9e9;
         }
       }
-
-      > img {
-        width: 15px;
-        height: 15px;
-      }
     }
   }
 
@@ -235,5 +237,16 @@ const nav = (isNavOpen: boolean) => css`
 
   @media (min-width: 768px) {
     width: 300px;
+  }
+`;
+
+const div = css`
+  margin-top: auto;
+  padding: 0 15px;
+
+  select {
+    width: 100%;
+    padding: 5px;
+    font-size: 16px;
   }
 `;

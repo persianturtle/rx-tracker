@@ -4,7 +4,11 @@
     "target": "ES2022",
     "lib": ["ES2022"],
     "module": "NodeNext",
-    "moduleResolution": "NodeNext"
+    "moduleResolution": "NodeNext",
+    "baseUrl": "./",
+    "paths": {
+      "@shared/*": ["../shared/*"]
+    }
   },
   "include": ["./src/**/*"],
   "exclude": ["node_modules", "dist"]

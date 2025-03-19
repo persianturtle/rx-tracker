@@ -8,9 +8,14 @@
     "jsx": "react-jsx",
     "baseUrl": "./",
     "paths": {
-      "@img/*": ["src/img/*"]
+      "@components/*": ["src/components/*"],
+      "@contexts/*": ["src/contexts/*"],
+      "@hooks/*": ["src/hooks/*"],
+      "@img/*": ["src/img/*"],
+      "@shared/*": ["../shared/*"],
+      "@store": ["src/store/store.tsx"]
     }
   },
-  "include": ["./src/**/*", "./declarations.d.ts"],
+  "include": ["./src/**/*", "./*.d.ts"],
   "exclude": ["node_modules", "dist"]
 }
