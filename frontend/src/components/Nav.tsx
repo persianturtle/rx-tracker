@@ -74,7 +74,7 @@ export default function Nav() {
               end
               onClick={() => setStore({ isNavOpen: false })}
             >
-              Recipients
+              All Recipients
             </NavLink>
           </li>
           <li>

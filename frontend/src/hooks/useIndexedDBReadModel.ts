@@ -66,7 +66,7 @@ export default function useCQRSWithIndexedDB(latestEvent?: Event) {
 
             case "updated_recipient":
               await store.put({
-                id: event.id,
+                id: event.payload.id,
                 name: event.payload.name,
                 timestamp: event.timestamp,
               });
@@ -78,7 +78,11 @@ export default function useCQRSWithIndexedDB(latestEvent?: Event) {
       }
 
       setStore({
-        recipients: await db.getAll("recipients"),
+        recipients: (await db.getAll("recipients")).sort(
+          (a, b) =>
+            convertEventTimestampStringToNumber(b.timestamp) -
+            convertEventTimestampStringToNumber(a.timestamp)
+        ),
       });
 
       db.close();

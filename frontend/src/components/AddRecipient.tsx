@@ -1,5 +1,5 @@
 import { ActionFunctionArgs, redirect, useFetcher } from "react-router";
-import useStore from "@store";
+import { css } from "@emotion/css";
 import {
   getCaregiverAPIKeyById,
   getCaregiverIdByURL,
@@ -7,22 +7,18 @@ import {
 import { addRecipient } from "@shared/services";
 
 export default function AddRecipient() {
-  const [caregiverId] = useStore((store) => store.caregiverId);
   const fetcher = useFetcher();
 
   return (
-    <section>
-      <h1>Add New Recipient</h1>
+    <main className={main}>
+      <h2>Add New Recipient</h2>
 
-      <fetcher.Form
-        method="post"
-        action={`/caregiver/${caregiverId}/recipient/add`}
-      >
+      <fetcher.Form method="post" action="">
         <input type="text" name="name" placeholder="Name" />
         <button type="submit">Add Recipient</button>
         {fetcher.state !== "idle" && <p>Saving...</p>}
       </fetcher.Form>
-    </section>
+    </main>
   );
 }
 
@@ -40,3 +36,7 @@ export async function action({ request }: ActionFunctionArgs) {
 
   return new Response("Invalid name", { status: 400 });
 }
+
+const main = css`
+  margin: 10px;
+`;

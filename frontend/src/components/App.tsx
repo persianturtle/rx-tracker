@@ -1,10 +1,18 @@
 import { css } from "@emotion/css";
 import useStore from "@store";
 import Nav from "@components/Nav";
-import { Outlet } from "react-router";
+import { Outlet, useLoaderData } from "react-router";
+import useCQRSWithIndexedDB from "@hooks/useIndexedDBReadModel";
+
+import type { Event } from "@shared/types";
 
 export default function App() {
   const [isNavOpen, setStore] = useStore((store) => store.isNavOpen);
+
+  const {
+    data: [latestEvent],
+  } = useLoaderData<{ data: Array<Event> }>();
+  useCQRSWithIndexedDB(latestEvent);
 
   return (
     <div

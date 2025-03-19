@@ -11,33 +11,41 @@ import { getCaregiverAPIKeyById } from "@shared/caregivers";
 import { fetchLatestEventForCaregiver } from "@shared/services";
 import App from "@components/App";
 import Recipients from "@components/Recipients";
-import Schedule from "@components/Schedules";
+import Recipient from "@components/Recipient";
 import AddRecipient, {
   action as AddRecipientAction,
 } from "@components/AddRecipient";
+import UpdateRecipient, {
+  action as UpdateRecipientAction,
+} from "@components/UpdateRecipient";
 
 let router = createBrowserRouter([
   { path: "/", element: <Navigate to="/caregiver/1" replace /> },
   {
     path: "/",
     Component: App,
+    loader,
+    HydrateFallback: () => null,
     children: [
       {
         path: "/caregiver/:caregiverId",
         Component: Recipients,
-        loader,
         children: [],
       },
       {
         path: "/caregiver/:caregiverId/recipient/:recipientId",
-        Component: Schedule,
-        loader,
+        Component: Recipient,
+        children: [],
+      },
+      {
+        path: "/caregiver/:caregiverId/recipient/:recipientId/edit",
+        Component: UpdateRecipient,
+        action: UpdateRecipientAction,
         children: [],
       },
       {
         path: "/caregiver/:caregiverId/recipient/add",
         Component: AddRecipient,
-        loader,
         action: AddRecipientAction,
         children: [],
       },

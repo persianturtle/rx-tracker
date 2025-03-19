@@ -11,7 +11,7 @@ export type Store = {
   recipients: Array<Recipient>;
 };
 
-const caregiverId = getCaregiverIdByURL(window.location.pathname);
+const caregiverId = getCaregiverIdByURL(window.location.href);
 
 const { Provider, useStore } = createFastContext<Store>({
   events: [],
