@@ -19,6 +19,8 @@ Check the [shared/types.ts](https://github.com/persianturtle/rx-tracker/blob/mai
 - marked_dose_as_taken
 - unmarked_dose_as_taken
 
+[Video Overview](https://drive.google.com/file/d/1NBQQjlPI-SVk8qAopPhGwY0VTp7VyOna/view?usp=sharing)
+
 ## Running the project
 
 ```sh
