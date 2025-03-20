@@ -38,6 +38,22 @@ And then configure the endpoint in [endpoints.ts](https://github.com/persianturt
 
 Otherwise, if my AWS stack is still running, you're free to use it.
 
+## Running Tests
+
+The testing approach I chose was to use Playwright to run user flows. To save on scope, I've added only one test. This test runs the user flow to add a recipient and mocks the network.
+
+```sh
+npm t
+```
+
+Headed mode:
+
+```sh
+npm run test:headed
+
+# Click on the play icon to run the test
+```
+
 ## Scope Cuts
 
 1. I used API key based authentication as the user management strategy. You can change the logged in user by opening the navigation menu (by clicking on the hamburger menu icon). This cuts auth related scope (no need to handle user registration and user management), while ensuring that we are building a multi-tenant Sass application.
