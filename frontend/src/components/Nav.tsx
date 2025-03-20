@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { NavLink, useNavigate } from "react-router";
+import { NavLink } from "react-router";
 import useStore from "@store";
 import { css } from "@emotion/css";
 import HamburgerIcon from "@img/hamburger.svg";
@@ -12,7 +12,6 @@ export default function Nav() {
   const [loggedInAs] = useStore((store) => store.loggedInAs);
   const [caregiverId] = useStore((store) => store.caregiverId);
   const [recipients] = useStore((store) => store.recipients);
-  let navigate = useNavigate();
 
   useEffect(() => {
     if (isNavOpen) {
@@ -53,12 +52,10 @@ export default function Nav() {
                   event.target.value.replace(/\D+/, "")
                 );
 
-                setStore({
-                  loggedInAs: event.target.value,
-                  isNavOpen: false,
-                  caregiverId,
-                });
-                navigate(`/caregiver/${caregiverId}`);
+                // Using a full page reload since, for some reason,
+                // using the `navigate` function from `react-router` results
+                // in App's useLoaderData having an undefined latest event.
+                window.location.href = `/caregiver/${caregiverId}`;
               }}
               value={loggedInAs}
             >
