@@ -18,6 +18,9 @@ import AddRecipient, {
 import UpdateRecipient, {
   action as UpdateRecipientAction,
 } from "@components/UpdateRecipient";
+import AddMedication, {
+  action as AddMedicationAction,
+} from "@components/AddMedication";
 
 let router = createBrowserRouter([
   { path: "/", element: <Navigate to="/caregiver/1" replace /> },
@@ -41,6 +44,12 @@ let router = createBrowserRouter([
         path: "/caregiver/:caregiverId/recipient/:recipientId/edit",
         Component: UpdateRecipient,
         action: UpdateRecipientAction,
+        children: [],
+      },
+      {
+        path: "/caregiver/:caregiverId/recipient/:recipientId/medication/add",
+        Component: AddMedication,
+        action: AddMedicationAction,
         children: [],
       },
       {

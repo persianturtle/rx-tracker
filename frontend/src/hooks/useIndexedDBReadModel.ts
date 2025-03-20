@@ -4,7 +4,7 @@ import { fetchAllEventsForCaregiverAfterTimestamp } from "@shared/services";
 import { getCaregiverAPIKeyById } from "@shared/caregivers";
 import useStore from "@store";
 
-import type { Event } from "@shared/types";
+import type { Event, Recipient } from "@shared/types";
 
 /**
  * The IndexedDB version corresponds to the latest event's timestamp.
@@ -71,6 +71,98 @@ export default function useCQRSWithIndexedDB(latestEvent?: Event) {
                 timestamp: event.timestamp,
               });
               break;
+
+            case "added_medication": {
+              const recipient_id = event.payload.recipient_id;
+              // I'm not sure why TypeScript doesn't recognize that
+              // recipient_id is guaranteed to be a string
+              if (typeof recipient_id === "string") {
+                const recipient: Recipient = await store.get(recipient_id);
+                await store.put({
+                  ...recipient,
+                  id: event.payload.recipient_id,
+                  medications: (recipient.medications ?? []).concat({
+                    id: event.id,
+                    name: event.payload.medication.name,
+                    dosage: event.payload.medication.dosage,
+                    schedule: event.payload.medication.schedule,
+                    log: {},
+                    isArchived: false,
+                    timestamp: event.timestamp,
+                  }),
+                });
+              }
+              break;
+            }
+
+            case "archived_medication": {
+              const recipient_id = event.payload.recipient_id;
+              // I'm not sure why TypeScript doesn't recognize that
+              // recipient_id is guaranteed to be a string
+              if (typeof recipient_id === "string") {
+                const recipient: Recipient = await store.get(recipient_id);
+                await store.put({
+                  ...recipient,
+                  id: event.payload.recipient_id,
+                  medications: recipient.medications?.map((medication) =>
+                    medication.id === event.payload.medication_id
+                      ? { ...medication, isArchived: true }
+                      : medication
+                  ),
+                });
+              }
+              break;
+            }
+
+            case "marked_dose_as_taken": {
+              const recipient_id = event.payload.recipient_id;
+              // I'm not sure why TypeScript doesn't recognize that
+              // recipient_id is guaranteed to be a string
+              if (typeof recipient_id === "string") {
+                const recipient: Recipient = await store.get(recipient_id);
+                await store.put({
+                  ...recipient,
+                  id: event.payload.recipient_id,
+                  medications: recipient.medications?.map((medication) =>
+                    medication.id === event.payload.medication_id
+                      ? {
+                          ...medication,
+                          log: {
+                            ...medication.log,
+                            [event.payload.dose_date]: true,
+                          },
+                        }
+                      : medication
+                  ),
+                });
+              }
+              break;
+            }
+
+            case "unmarked_dose_as_taken": {
+              const recipient_id = event.payload.recipient_id;
+              // I'm not sure why TypeScript doesn't recognize that
+              // recipient_id is guaranteed to be a string
+              if (typeof recipient_id === "string") {
+                const recipient: Recipient = await store.get(recipient_id);
+                await store.put({
+                  ...recipient,
+                  id: event.payload.recipient_id,
+                  medications: recipient.medications?.map((medication) =>
+                    medication.id === event.payload.medication_id
+                      ? {
+                          ...medication,
+                          log: {
+                            ...medication.log,
+                            [event.payload.dose_date]: false,
+                          },
+                        }
+                      : medication
+                  ),
+                });
+              }
+              break;
+            }
           }
         }
 

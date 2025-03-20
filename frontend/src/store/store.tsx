@@ -1,13 +1,17 @@
 import createFastContext from "@contexts/createFastContext";
 import { getCaregiverIdByURL } from "@shared/caregivers";
 
-import type { Event, Recipient } from "@shared/types";
+import type { Event, Recipient, Recurrence } from "@shared/types";
 
 export type Store = {
   events: Array<Event>;
   caregiverId: number;
   isNavOpen: boolean;
   loggedInAs: string;
+  medicationFormState: Partial<{
+    startDate: string;
+    recurrenceType: Pick<Recurrence, "type">;
+  }>;
   recipients: Array<Recipient>;
 };
 
@@ -18,6 +22,7 @@ const { Provider, useStore } = createFastContext<Store>({
   caregiverId,
   isNavOpen: false,
   loggedInAs: `Caregiver ${caregiverId}`,
+  medicationFormState: {},
   recipients: [],
 });
 

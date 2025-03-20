@@ -14,7 +14,7 @@ export default function AddRecipient() {
       <h2>Add New Recipient</h2>
 
       <fetcher.Form method="post" action="">
-        <input type="text" name="name" placeholder="Name" />
+        <input type="text" name="name" placeholder="Name" required />
         <button type="submit">Add Recipient</button>
         {fetcher.state !== "idle" && <p>Saving...</p>}
       </fetcher.Form>

@@ -105,3 +105,104 @@ export function updateRecipient({
     body: JSON.stringify(body),
   });
 }
+
+/**
+ * Add a new medication.
+ */
+export function addMedication({
+  apiKey,
+  payload,
+}: {
+  apiKey: string;
+  payload: Extract<Event, { event_type: "added_medication" }>["payload"];
+}): Promise<Response> {
+  const body: Partial<Extract<Event, { event_type: "added_medication" }>> = {
+    event_type: "added_medication",
+    payload,
+  };
+
+  return fetch(`${EVENTS_ENDPOINT}/store`, {
+    method: "POST",
+    headers: {
+      "x-api-key": apiKey,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+}
+
+/**
+ * Archive a medication.
+ */
+export function archiveMedication({
+  apiKey,
+  payload,
+}: {
+  apiKey: string;
+  payload: Extract<Event, { event_type: "archived_medication" }>["payload"];
+}): Promise<Response> {
+  const body: Partial<Extract<Event, { event_type: "archived_medication" }>> = {
+    event_type: "archived_medication",
+    payload,
+  };
+
+  return fetch(`${EVENTS_ENDPOINT}/store`, {
+    method: "POST",
+    headers: {
+      "x-api-key": apiKey,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  });
+}
+
+/**
+ * Mark a dose as taken.
+ */
+export function markDoseAsTaken({
+  apiKey,
+  payload,
+}: {
+  apiKey: string;
+  payload: Extract<Event, { event_type: "marked_dose_as_taken" }>["payload"];
+}): Promise<Response> {
+  const body: Partial<Extract<Event, { event_type: "marked_dose_as_taken" }>> =
+    {
+      event_type: "marked_dose_as_taken",
+      payload,
+    };
+
+  return fetch(`${EVENTS_ENDPOINT}/store`, {
+    method: "POST",
+    headers: {
+      "x-api-key": apiKey,
+    },
+    body: JSON.stringify(body),
+  });
+}
+
+/**
+ * Unmark a dose as taken.
+ */
+export function unmarkDoseAsTaken({
+  apiKey,
+  payload,
+}: {
+  apiKey: string;
+  payload: Extract<Event, { event_type: "unmarked_dose_as_taken" }>["payload"];
+}): Promise<Response> {
+  const body: Partial<
+    Extract<Event, { event_type: "unmarked_dose_as_taken" }>
+  > = {
+    event_type: "unmarked_dose_as_taken",
+    payload,
+  };
+
+  return fetch(`${EVENTS_ENDPOINT}/store`, {
+    method: "POST",
+    headers: {
+      "x-api-key": apiKey,
+    },
+    body: JSON.stringify(body),
+  });
+}

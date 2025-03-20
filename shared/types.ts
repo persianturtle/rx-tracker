@@ -17,14 +17,45 @@ export type Event =
       id: EventId;
       event_type: "added_medication";
       caregiver_id: CaregiverId;
-      payload: Pick<Medication, "name" | "schedule">;
+      payload: {
+        medication: Pick<Medication, "name" | "dosage"> & {
+          schedule: Schedule;
+        };
+      } & {
+        recipient_id: Recipient["id"];
+      };
       timestamp: Timestamp;
     }
   | {
       id: EventId;
       event_type: "archived_medication";
       caregiver_id: CaregiverId;
-      payload: Pick<Medication, "id">;
+      payload: {
+        medication_id: Medication["id"];
+        recipient_id: Recipient["id"];
+      };
+      timestamp: Timestamp;
+    }
+  | {
+      id: EventId;
+      event_type: "marked_dose_as_taken";
+      caregiver_id: CaregiverId;
+      payload: {
+        medication_id: Medication["id"];
+        recipient_id: Recipient["id"];
+        dose_date: string;
+      };
+      timestamp: Timestamp;
+    }
+  | {
+      id: EventId;
+      event_type: "unmarked_dose_as_taken";
+      caregiver_id: CaregiverId;
+      payload: {
+        medication_id: Medication["id"];
+        recipient_id: Recipient["id"];
+        dose_date: string;
+      };
       timestamp: Timestamp;
     };
 
@@ -35,57 +66,39 @@ type Timestamp = string;
 export type Recipient = {
   id: string;
   name: string;
-  medications: Array<Medication>;
+  medications?: Array<Medication>;
   timestamp: Timestamp;
 };
 
 export type Medication = {
   id: string;
   name: string;
+  dosage: {
+    amount: number;
+    unit: "mg" | "g" | "mcg" | "IU" | "mL" | "drops" | "tablets";
+  };
   schedule: Schedule;
+  log: Record<string, boolean>;
   isArchived: boolean;
   timestamp: Timestamp;
 };
 
 export type Schedule = {
-  id: string;
-  name: string;
-  dosage:
-    | {
-        type: "amount";
-        amount: number;
-        unit: "mg" | "g" | "mcg" | "IU" | "mL" | "drops" | "tablets";
-      }
-    | { type: "as-needed"; maxPerDay?: number };
   startDate: string;
   endDate?: string;
-  recurrence?: {
-    frequency:
-      | {
-          type: "every-n-days";
-          n: number;
-          timesOfDay: Array<Time>;
-        }
-      | {
-          type: "every-nth-day-of-month";
-          dayOfMonth: number;
-          timesOfDay: Array<Time>;
-        };
-  };
-  timestamp: Timestamp;
+  recurrence: Recurrence;
 };
 
-type Time = `${Hour}:${"00" | "15" | "30" | "45"} ${"AM" | "PM"}`;
-type Hour =
-  | "01"
-  | "02"
-  | "03"
-  | "04"
-  | "05"
-  | "06"
-  | "07"
-  | "08"
-  | "09"
-  | "10"
-  | "11"
-  | "12";
+export type Recurrence =
+  | {
+      type: "every-n-days";
+      n: number;
+      time: Time;
+    }
+  | {
+      type: "every-nth-day-of-month";
+      dayOfMonth: number;
+      time: Time;
+    };
+
+type Time = string;
